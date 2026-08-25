@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Booking System</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 10px; max-width: 100%; box-sizing: border-box; }
+    .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: #f9f9f9; }
+    input, select, button { margin: 8px 0; padding: 10px; width: 100%; box-sizing: border-box; font-size: 16px; border-radius: 4px; }
+    button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+    input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 650px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    .status-Approved { color: green; font-weight: bold; }
+    .status-Pending { color: orange; font-weight: bold; }
+    .status-Rejected { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>වාහන වෙන්කිරීමේ පද්ධතිය</h2>
+
+  <!-- Login Section -->
+  <div class="card" id="loginSection">
+    <h3>පද්ධතියට ලොග් වීම</h3>
+    <input type="email" id="emailInput" placeholder="ඔබගේ Email ලිපිනය ඇතුළත් කරන්න">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- App Main Area -->
+  <div id="appSection" style="display:none;">
+    <p>ලොග් වී ඇත්තේ: <b id="userDisplay"></b></p>
+    <button onclick="logout()" style="background-color: #dc3545;">Logout</button>
+
+    <!-- Requester Form -->
+    <div class="card" id="bookingFormCard">
+      <h3>නව දිනයක් වෙන්කිරීම</h3>
+      
+      <label>ඉල්ලුම්කරුගේ නම:</label>
+      <select id="userNameSelect" onchange="autoFillDesignation()">
+        <option value="">-- නම තෝරන්න --</option>
+      </select>
+
+      <label>තනතුර:</label>
+      <input type="text" id="designationInput" placeholder="තනතුර ස්වයංක්‍රීයව පෙනෙනු ඇත" readonly>
+
+      <label>වෙන්කිරීම අවශ්‍ය දිනය:</label>
+      <input type="date" id="requestedDate">
+      
+      <label>යන ස්ථානය / ගමනාන්තය:</label>
+      <input type="text" id="destinationInput" placeholder="උදා: කොළඹ, ගාලු ආදී වශයෙන්">
+
+      <button onclick="createBooking()" style="background-color: #28a745;">ඉල්ලුම් කරන්න</button>
+    </div>
+
+    <!-- Booking List -->
+    <div class="card">
+      <h3>ඉල්ලීම් ලැයිස්තුව</h3>
+      <div class="table-container">
+        <table id="bookingsTable">
+          <thead>
+            <tr>
+              <th>දිනය</th>
+              <th>නම</th>
+              <th>තනතුර</th>
+              <th>ස්ථානය</th>
+              <th>තත්ත්වය</th>
+              <th>සටහන</th>
+              <th id="actionHeader" style="display:none;">Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzBLSQQjP36sf5cdBBmDYasndS21mZbbK-XN843iEo-CvhmV4TLRmmd2DJ2OHW_N-s/exec";
+    const APPROVER_EMAIL = "indikaruwankumarasci@gmail.com"; 
+
+    // පරිශීලකයින් 3 දෙනාගේ තොරතුරු (ඔබට අවශ්‍ය පරිදි වෙනස් කරන්න)
+    const USERS = [
+      { name: "මදුරංග", email: "madurangadilan307@gmail.com", designation: "කළමනාකරු" },
+      { name: "කුමාරසිංහ", email: "maduwanthikumarasingha6@gmail.com", designation: "ලේකම්" },
+      { name: "සුනිල් ප්‍රනාන්දු", email: "user3@gmail.com", designation: "තාක්ෂණික නිලධාරී" }
+    ];
+
+    let currentUser = "";
+
+    // Load user drop-down list on startup
+    window.onload = function() {
+      const nameSelect = document.getElementById("userNameSelect");
+      USERS.forEach(u => {
+        let opt = document.createElement("option");
+        opt.value = u.name;
+        opt.innerText = u.name;
+        nameSelect.appendChild(opt);
+      });
+    };
+
+    function autoFillDesignation() {
+      const selectedName = document.getElementById("userNameSelect").value;
+      const userObj = USERS.find(u => u.name === selectedName);
+      document.getElementById("designationInput").value = userObj ? userObj.designation : "";
+    }
+
+    function login() {
+      const email = document.getElementById("emailInput").value.trim().toLowerCase();
+      if (!email) return alert("කරුණාකර Email එක ඇතුළත් කරන්න!");
+      
+      currentUser = email;
+      document.getElementById("userDisplay").innerText = currentUser;
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("appSection").style.display = "block";
+
+      if (currentUser === APPROVER_EMAIL.toLowerCase()) {
+        document.getElementById("bookingFormCard").style.display = "none";
+        document.getElementById("actionHeader").style.display = "table-cell";
+      } else {
+        document.getElementById("bookingFormCard").style.display = "block";
+        document.getElementById("actionHeader").style.display = "none";
+      }
+
+      loadBookings();
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function createBooking() {
+      const userName = document.getElementById("userNameSelect").value;
+      const designation = document.getElementById("designationInput").value;
+      const date = document.getElementById("requestedDate").value;
+      const destination = document.getElementById("destinationInput").value.trim();
+
+      if (!userName) return alert("කරුණාකර නම තෝරන්න!");
+      if (!date) return alert("දිනයක් තෝරන්න!");
+      if (!destination) return alert("කරුණාකර යන ස්ථානය ඇතුළත් කරන්න!");
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "CREATE_BOOKING",
+          userEmail: currentUser,
+          userName: userName,
+          designation: designation,
+          requestedDate: date,
+          destination: destination
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        if (data.status === "SUCCESS") {
+          document.getElementById("userNameSelect").value = "";
+          document.getElementById("designationInput").value = "";
+          document.getElementById("requestedDate").value = "";
+          document.getElementById("destinationInput").value = "";
+          loadBookings();
+        }
+      })
+      .catch(err => console.error("Error creating booking:", err));
+    }
+
+    function loadBookings() {
+      fetch(`${SCRIPT_URL}?email=${encodeURIComponent(currentUser)}`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#bookingsTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(item => {
+          let row = `<tr>
+            <td>${item.requestedDate}</td>
+            <td>${item.userName || '-'}</td>
+            <td>${item.designation || '-'}</td>
+            <td>${item.destination || '-'}</td>
+            <td class="status-${item.status}">${item.status}</td>
+            <td>${item.approverNote || '-'}</td>`;
+
+          if (currentUser === APPROVER_EMAIL.toLowerCase()) {
+            row += `<td>
+              <button onclick="updateStatus('${item.requestId}', 'Approved')" style="padding: 5px; margin: 2px;">Approve</button>
+              <button onclick="updateStatus('${item.requestId}', 'Rejected')" style="padding: 5px; margin: 2px; background-color: #dc3545;">Reject</button>
+            </td>`;
+          }
+
+          row += `</tr>`;
+          tbody.innerHTML += row;
+        });
+      })
+      .catch(err => console.error("Error loading bookings:", err));
+    }
+
+    function updateStatus(requestId, status) {
+      const note = prompt("සටහනක් ඇතුළත් කරන්න (විකල්ප):");
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "UPDATE_STATUS",
+          userEmail: currentUser,
+          requestId: requestId,
+          status: status,
+          note: note
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        loadBookings();
+      })
+      .catch(err => console.error("Error updating status:", err));
+    }
+  </script>
+</body>
+</html>
