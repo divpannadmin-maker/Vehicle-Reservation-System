@@ -6,6 +6,24 @@
   <title>Vehicle Booking System</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 10px; max-width: 100%; box-sizing: border-box; }
+    
+    /* Header සහ Logo එක සඳහා CSS Styling */
+    .header-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+    }
+    .header-logo {
+      width: 80px;
+      height: auto;
+    }
+    .header-text h2 {
+      margin: 2px 0;
+    }
+
     .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: #f9f9f9; }
     input, select, button { margin: 8px 0; padding: 10px; width: 100%; box-sizing: border-box; font-size: 16px; border-radius: 4px; }
     button { background-color: #007bff; color: white; border: none; cursor: pointer; }
@@ -20,7 +38,17 @@
 </head>
 <body>
 
-  <h2>වාහන වෙන්කිරීමේ පද්ධතිය</h2>
+  <!-- Header Section with Logo -->
+  <div class="header-container">
+    <img src="SriLanka.png" 
+         alt="රාජ්‍ය ලාංඡනය" 
+         class="header-logo" 
+         width="100">
+    <div class="header-text">
+      <h2>ප්‍රාදේශීය ලේකම් කාර්යාලය - පන්නල</h2>
+      <h2> වාහනය වෙන්කිරීමේ පද්ධතිය - 252 – 9869 කැබ් රථය</h2>
+    </div>
+  </div>
 
   <!-- Login Section -->
   <div class="card" id="loginSection">
@@ -50,7 +78,7 @@
       <input type="date" id="requestedDate">
       
       <label>යන ස්ථානය / ගමනාන්තය:</label>
-      <input type="text" id="destinationInput" placeholder="උදා: කොළඹ, ගාලු ආදී වශයෙන්">
+      <input type="text" id="destinationInput" placeholder="උදා: කොළඹ, කුරුණෑගල ආදී වශයෙන් හේතුව ද සදහන් කරන්න.">
 
       <button onclick="createBooking()" style="background-color: #28a745;">ඉල්ලුම් කරන්න</button>
     </div>
@@ -78,10 +106,10 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBbcy4OUsG7R7gDAetC1ez_oOwnrNVNh-MxSVj9mzNRUKz9AgYlUzf8MAdFItYFem67g/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzBLSQQjP36sf5cdBBmDYasndS21mZbbK-XN843iEo-CvhmV4TLRmmd2DJ2OHW_N-s/exec";
     const APPROVER_EMAIL = "indikaruwankumarasci@gmail.com"; 
 
-    // පරිශීලකයින් 3 දෙනාගේ තොරතුරු (ඔබට අවශ්‍ය පරිදි වෙනස් කරන්න)
+    // පරිශීලකයින් 3 දෙනාගේ තොරතුරු
     const USERS = [
       { name: "මදුරංග", email: "madurangadilan307@gmail.com", designation: "කළමනාකරු" },
       { name: "කුමාරසිංහ", email: "maduwanthikumarasingha6@gmail.com", designation: "ලේකම්" },
